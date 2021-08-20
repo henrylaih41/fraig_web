@@ -2,6 +2,7 @@ import { AfterViewInit, Component, ElementRef, OnInit, ViewChild, ViewEncapsulat
 import { Terminal } from "xterm";
 import { CommandService } from '../jsonrpc_client/command.service';
 import { ParserService } from '../jsonrpc_client/parser.service';
+import { Trie } from '../trie';
 @Component({
   selector: 'app-terminal',
   templateUrl: './terminal.component.html',
@@ -18,8 +19,13 @@ export class TerminalComponent implements  AfterViewInit {
   history_index: number = 0;
   terminal: any;
   last_key : string = "";
+  trie = new Trie()
   constructor(private commandService: CommandService, 
-              private parserService: ParserService, ) {}
+              private parserService: ParserService, ) {
+    for(let cmd of parserService.commands){
+      this.trie.insert(cmd);
+    }
+  }
   // to open xterm, we have to retrieve dom object
   @ViewChild('xterm_div', {static: true}) xterm_div!: ElementRef; 
   
@@ -68,10 +74,7 @@ export class TerminalComponent implements  AfterViewInit {
             this.terminal.write('\b');
         }
       } else if(ev.key == "Tab"){
-          this.current_line = this.prompt + this.parserService.autoComplete(
-                                            this.current_line.slice(this.prompt.length), 
-                                            this.terminal
-                                            );   
+          this.current_line = this.prompt + this.autoComplete(this.current_line.slice(this.prompt.length));   
       } else if (printable) {
           if(ev.key == "ArrowUp" || ev.key == "ArrowDown"){
             let dir = {"ArrowUp": -1, "ArrowDown": 1}
@@ -133,4 +136,23 @@ export class TerminalComponent implements  AfterViewInit {
     });
   }
 
+  autoComplete(command_string: string){
+    let node = this.trie.findNode(command_string);
+    console.log(command_string, node, this.trie.root);
+    // no possible command
+    if(node === null)
+      return command_string;
+    // only one possible command, auto complete it
+    if(node.count == 1){
+      let new_command = command_string;
+      let arr = this.trie.retrieveCharactersFromNode(node);
+      for(let c of arr){
+        this.terminal.write(c);
+        new_command += c;
+      }
+      return new_command;
+    }
+    // multiple possible command, do nothing
+    return command_string;
+  }
 }

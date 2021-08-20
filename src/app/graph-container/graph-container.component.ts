@@ -11,7 +11,6 @@ import * as parameter from './graph-shape-parameter';
   styleUrls: ['./graph-container.component.css']
 })
 export class GraphContainerComponent implements OnInit, AfterViewInit {
-// Check the web for documentation (update$)
 // Great reference here: https://stackblitz.com/edit/angular-edligh?file=src%2Fmain.ts
 // More discussion here: https://gitter.im/swimlane/ngx-graph?at=5ce276f3ad024978c6f92bbc
   graph; // the graph info is stored in commandService
@@ -31,6 +30,7 @@ export class GraphContainerComponent implements OnInit, AfterViewInit {
   io_stroke_color  = parameter.io_stroke_color
   io_text_x        = parameter.io_width / 2
   io_text_y        = parameter.io_height / 2
+  // svg path.d
   aig_d = `M 0 0 v ${this.aig_lowerbase} L ${this.aig_width} ${(this.aig_upperbase + this.aig_lowerbase)/2} v -${this.aig_upperbase} L 0 0`
   constructor(private commandService: CommandService) {
     this.graph = this.commandService.graph // the graph is stored in commandService

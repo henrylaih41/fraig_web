@@ -1,84 +1,9 @@
 import { Injectable } from '@angular/core';
 import { Terminal } from 'xterm';
-
+import {Trie} from '../trie'
 @Injectable({
   providedIn: 'root'
 })
-
-class Trie {
-  root : TrieNode;
-  constructor(){this.root = new TrieNode()}
-
-  insert(word: string){
-    let node = this.root;
-    for(let c of word){
-      if(c in node.children){
-        node = node.children[c];
-        node.count += 1;
-      }
-      else{
-        node.children[c] = new TrieNode();
-        node = node.children[c]; 
-      }
-    }
-    // node would be the last char in word;
-    node.is_word = true;
-    node.value = word;
-  }
-
-  findNode(prefix : string){
-    let node = this.root;
-    for(let c of prefix){
-      if(c in node.children)
-        node = node.children[c];
-      else
-        return null
-    }
-    return node;
-  }
-
-  findAllFromWord(word : string){
-    let root = this.findNode(word);
-    let result : string[] = [] 
-    if(root === null)
-      return result;
-    this.dfs(root, result);
-    return result;
-  }
-  
-  dfs(root : TrieNode, arr: Array<string>){
-    if(root.is_word)
-      arr.push(root.value);
-    for(let c in root.children)
-      this.dfs(root.children[c], arr);
-  }
-
-  // the count of node must be 1
-  retrieveCharactersFromNode(root : TrieNode){
-    let arr : string[] = [];
-    while(!root.is_word){
-      // only one char in children
-      for(let c in root.children)
-        arr.push(c);
-      root = root.children[arr[arr.length-1]];
-    }
-
-    return arr;
-  }
-}
-
-class TrieNode {
-  value : string;
-  is_word : boolean;
-  children : {[key:string] : TrieNode};
-  count : number;
-  constructor(count = 1, is_word = false){
-    this.value = ""
-    this.is_word = is_word;
-    this.children = {};
-    this.count = count;
-  }
-}
 
 export class ParserService {
   trie = new Trie();
@@ -97,11 +22,7 @@ export class ParserService {
       console.log("Check cirwrite %s", options);
     },
   }
-  constructor() { 
-    for(let cmd of this.commands){
-      this.trie.insert(cmd);
-    }
-  }
+  constructor() {}
   // TODO: allow lazy completion
   // TODO: allow space in front of command
   parseCommand(command_string : string, terminal : Terminal){
@@ -126,26 +47,6 @@ export class ParserService {
     };
   }
 
-  // this function is strongly coupled with the logic in terminal components
-  autoComplete(command_string: string, terminal : Terminal){
-    let node = this.trie.findNode(command_string);
-    console.log(command_string, node, this.trie.root);
-    // no possible command
-    if(node === null)
-      return command_string;
-    // only one possible command, auto complete it
-    if(node.count == 1){
-      let new_command = command_string;
-      let arr = this.trie.retrieveCharactersFromNode(node);
-      for(let c of arr){
-        terminal.write(c);
-        new_command += c;
-      }
-      return new_command;
-    }
-    // multiple possible command, do nothing
-    return command_string;
-  }
   // optimization can be done here if the graph generation is too slow
   parseCircuit(file){
     // CONST 0 is always in the graph
