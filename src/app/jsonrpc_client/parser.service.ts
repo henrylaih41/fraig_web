@@ -210,7 +210,7 @@ export class ParserService {
       graph.links.push({source: right_idx.toString(), 
                         target: idx.toString(),
                         data : {
-                          type : "left"
+                          type : "right"
                         },
                       })
     }

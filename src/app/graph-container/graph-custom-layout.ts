@@ -1,5 +1,6 @@
 
 // code from https://github.com/swimlane/ngx-graph/blob/184ce5aea8accadd6b72756a8d470e9da1d2d652/src/docs/demos/components/ngx-graph-org-tree/customDagreNodesOnly.ts
+import { transformAll } from '@angular/compiler/src/render3/r3_ast';
 import { parseI18nMeta } from '@angular/compiler/src/render3/view/i18n/meta';
 import { Graph, Layout, Edge } from '@swimlane/ngx-graph';
 import { O_APPEND } from 'constants';
@@ -92,18 +93,18 @@ export class DagreNodesOnlyLayout implements Layout {
     const rankAxis: 'x' | 'y' = this.settings.orientation === 'BT' || this.settings.orientation === 'TB' ? 'y' : 'x';
     const orderAxis: 'x' | 'y' = rankAxis === 'y' ? 'x' : 'y';
     const rankDimension = rankAxis === 'y' ? 'height' : 'width';
-    const ends = {"left" : targetNode.position[rankAxis] +  targetNode.dimension[rankAxis] / 3,
-                  "right" : targetNode.position[rankAxis] + targetNode.dimension[rankAxis] * 2 / 3,
-                  "output" : targetNode.position[rankAxis] + targetNode.dimension[rankAxis] / 2}
-    // determine new arrow position
-    const dir = sourceNode.position[rankAxis] <= targetNode.position[rankAxis] ? -1 : 1;
+    const orderDimension = rankAxis === 'y' ? 'width' : 'height';
+    const ends = {"left" : targetNode.position[orderAxis] - targetNode.dimension[orderDimension] / 2 + targetNode.dimension[orderDimension] / 3,
+                  "right" : targetNode.position[orderAxis] - targetNode.dimension[orderDimension] / 2 + targetNode.dimension[orderDimension] * 2 / 3,
+                  "output" : targetNode.position[orderAxis]}
+    // node.position holds the middle point of the svg
     const startingPoint = {
       [orderAxis]: sourceNode.position[orderAxis],
-      [rankAxis]: sourceNode.position[rankAxis] - dir * (sourceNode.dimension[rankDimension] / 2)
+      [rankAxis]: sourceNode.position[rankAxis] + (sourceNode.dimension[rankDimension] / 2)
     };
     const endingPoint = {
-      [orderAxis]: targetNode.position[orderAxis] - dir * targetNode.position[orderAxis] / 2,
-      [rankAxis]: targetNode.position[rankAxis] //ends[edge.data.type] 
+      [orderAxis]: ends[edge.data.type],
+      [rankAxis]: targetNode.position[rankAxis] - targetNode.dimension[rankDimension] / 2
     };
 
     const curveDistance = this.settings.curveDistance || this.defaultSettings.curveDistance;
@@ -175,12 +176,8 @@ export class DagreNodesOnlyLayout implements Layout {
     });
 
     for (const node of this.dagreNodes) {
-      if (!node.width) {
         node.width = (node.data.is_aig) ? parameter.aig_width : parameter.io_width;
-      }
-      if (!node.height) {
-        node.height = (node.data.is_aig) ? parameter.aig_lowerbase : parameter.aig_upperbase;
-      }
+        node.height = (node.data.is_aig) ? parameter.aig_lowerbase : parameter.io_height;
 
       // update dagre
       this.dagreGraph.setNode(node.id, node);
