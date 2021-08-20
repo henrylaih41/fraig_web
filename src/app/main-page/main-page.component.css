@@ -1,0 +1,86 @@
+:root {
+    --input-size: 50px;
+    --margin-size: 50px;
+  }
+html, body {
+    height: 100%;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 16px;
+    color: #38fd3a;
+    padding: 0;
+    margin: 0;
+    line-height: 1.5em;
+}
+body {
+    background-color: #000000;
+}
+p {
+    margin: 0;
+    text-shadow: 0 0 2px rgba(56, 253, 56, 1);
+}
+
+
+#screen {
+position: absolute;
+top: 0;
+right: 0;
+bottom: 50px;
+left: 0;
+margin-left: var(--var(--margin-size));
+margin-right: var(--margin-size);
+margin-top: var(--margin-size) * .5;
+overflow: auto;
+}
+#ihm {
+position: absolute;
+bottom: 0;
+height: var(--input-size);
+left: 0;
+right: 0;
+padding-left: var(--margin-size);
+padding-right: var(--margin-size);
+}
+#input-indicator {
+line-height: var(--input-size);
+float: left;
+}
+#input-render {
+    height: var(--input-size);
+   
+} .input-render-content {
+    padding-left: 1.5em;
+    line-height: var(--input-size);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: auto;
+    display: block;
+}
+
+#caret {
+margin-bottom: -0px;
+display: inline-block;
+animation-duration: .5s;
+animation-name: caret-behavior;
+animation-iteration-count: infinite;
+}
+
+@keyframes caret-behavior {
+from {
+	opacity: 0;
+}
+
+to {
+	opacity: 1;
+}
+}
+ul {
+	list-style: none;
+padding-left: 0;
+}
+li {
+cursor: pointer;
+box-shadow: 0 0 2px rgba(56, 253, 56, 0);
+text-shadow: 0 0 2px rgba(56, 253, 56, 1);
+transition: color .2s ease, background-color .2s ease, box-shadow .2s ease, text-shadow .2s ease;
+}

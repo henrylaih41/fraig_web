@@ -1,0 +1,40 @@
+<ngx-graph
+  [curve] = "curve"
+  [layout] = "layout"
+  [view] = "[1400,600]"
+  [autoCenter]="true"
+  [autoZoom]="true"
+  [links]="graph.links"
+  [nodes]="graph.nodes"
+  [showMiniMap]="true"
+  [draggingEnabled]="true"
+  [update$]="update$"
+ >
+    <ng-template #nodeTemplate let-node>
+      <svg:g class="node">
+        <ng-container *ngIf="!node.data.is_aig">
+            <svg:rect
+              [attr.width]="io_width"
+              [attr.height]="io_height"
+              [attr.fill]="io_fill_color"
+              [attr.stroke]="io_stroke_color"
+            />
+            <svg:text>
+              <svg:tspan alignment-baseline="middle" text-anchor="middle" [attr.x]="io_text_x" [attr.y]="io_text_y">{{node.id}}</svg:tspan>
+            </svg:text>
+        </ng-container>
+
+        <ng-container *ngIf="node.data.is_aig">
+            <svg:path
+              [attr.d] = "aig_d"
+              [attr.fill] = "aig_fill_color"
+              [attr.stroke] = "aig_stroke_color"
+            />
+            <svg:text alignment-baseline="center">
+              <svg:tspan alignment-baseline="middle" text-anchor="middle" [attr.x]="aig_text_x" [attr.y]="aig_text_y">{{node.id}}</svg:tspan>
+            </svg:text>
+        </ng-container>
+      </svg:g>
+    </ng-template>
+
+</ngx-graph>
