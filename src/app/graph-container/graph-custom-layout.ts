@@ -1,11 +1,7 @@
 
-// code from https://github.com/swimlane/ngx-graph/blob/184ce5aea8accadd6b72756a8d470e9da1d2d652/src/docs/demos/components/ngx-graph-org-tree/customDagreNodesOnly.ts
-import { transformAll } from '@angular/compiler/src/render3/r3_ast';
-import { parseI18nMeta } from '@angular/compiler/src/render3/view/i18n/meta';
+// reference: https://github.com/swimlane/ngx-graph/blob/184ce5aea8accadd6b72756a8d470e9da1d2d652/src/docs/demos/components/ngx-graph-org-tree/customDagreNodesOnly.ts
 import { Graph, Layout, Edge } from '@swimlane/ngx-graph';
-import { O_APPEND } from 'constants';
 import * as dagre from 'dagre';
-import { AppRoutingModule } from '../app-routing.module';
 import * as parameter from './graph-shape-parameter'
 
 export enum Orientation {

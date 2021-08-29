@@ -52,7 +52,7 @@ export class CommandService {
   }
 
   sendCmd(command: string, terminal: Terminal){
-    const parsed = this.parser.parseCommand(command, terminal);
+    const parsed = this.parser.parseCommand(command.trim(), terminal);
     if(parsed !== null){
       this.client.request(parsed.cmd, parsed.options)
       .then((result) => {

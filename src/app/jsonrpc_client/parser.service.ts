@@ -1,16 +1,40 @@
+import { identifierModuleUrl } from '@angular/compiler';
 import { Injectable } from '@angular/core';
 import { Terminal } from 'xterm';
 import {Trie} from '../trie'
+
+enum Errors {
+  MISSING_ARGUMENT,
+  ILLEGAL_COMMAND,
+  INVALID_ARGUMENT,
+}
+
 @Injectable({
   providedIn: 'root'
 })
-
 export class ParserService {
-  trie = new Trie();
   commands = ["cirread", "cirwrite", "add"]
   usage : {[key:string] : string} = {
     "cirread": "Usage: CIRRead <(string fileName)> [-Replace]",
     "cirwrite" : "Usage: CIRWrite [(int gateId)][-Output (string aagFile)]",
+  }
+  // position argument must be filled so we don't need default value
+  options_requirement : {[key:string] : {[key : string] : any}} = {
+    "cirread" : {
+      "position" : ["fileName"],
+      "flag"     : {
+        "-r" : false
+      },
+      "optional" : {}
+    },
+    "cirwrite" : {
+      "position" : [],
+      "flag"     : {},
+      "optional" : {
+        "-o" : "None",
+        "-g" : -1
+      }
+    },
   }
   // The option check for each command, every new commands need a
   // option check.
@@ -23,6 +47,20 @@ export class ParserService {
     },
   }
   constructor() {}
+  printError(error, argument, terminal){
+    if(error == Errors.ILLEGAL_COMMAND){
+      terminal.write('\r\n');
+      terminal.write("Illegal Command (" + argument + ")!!!");
+    }
+    else if(error == Errors.MISSING_ARGUMENT){
+      terminal.write('\r\n');
+      terminal.write("Missing Argument (" + argument + ")!!!");
+    }
+    else if(error == Errors.INVALID_ARGUMENT){
+      terminal.write('\r\n');
+      terminal.write("Invalid Argument (" + argument + ")!!!");
+    }
+  }
   // TODO: allow lazy completion
   // TODO: allow space in front of command
   parseCommand(command_string : string, terminal : Terminal){
@@ -32,19 +70,59 @@ export class ParserService {
     let parsed_options : {[key:string] : string} = {}
     // Error Handling: illegal commands
     if(!this.commands.includes(cmd)){
-      terminal.write('\r\n');
-      terminal.write("Illegal Command (" + cmd + ")!!!");
+      this.printError(Errors.ILLEGAL_COMMAND, cmd, terminal)
       return null;
     }
     // [TODO] do option
     // hard code for testing 
-    if(cmd == "cirread"){
-      parsed_options["fileName"] = options[0];
-    }
+    parsed_options = this.parseOption(options, cmd, terminal)
+    if(parsed_options == null) return null;
+
     return { 
       "cmd" : cmd,
       "options" : parsed_options,
     };
+  }
+
+  parseOption(options : string[], cmd : string, terminal : Terminal){
+    let parsed : {[key:string] : any } = {}
+    let i = 0, pos_index = 0;
+    let optional = this.options_requirement[cmd]["optional"]
+    let position = this.options_requirement[cmd]["position"]
+    let flag     = this.options_requirement[cmd]["flag"]
+    for (const [key, value] of Object.entries(optional)){
+      parsed[key] = value
+    }
+    for (const [key, value] of Object.entries(flag)){
+      parsed[key] = value
+    }
+    while(i < options.length){
+      if(options[i] in optional){
+        if(i+1 == options.length){
+          this.printError(Errors.MISSING_ARGUMENT, options[i], terminal)
+          return null
+        }  
+        parsed[options[i]] = options[i+1]
+        i += 2
+      }
+      else if(options[i] in flag){
+        parsed[options[i]] = true
+        i += 1
+      }
+      else {
+        if(pos_index == position.length){
+          this.printError(Errors.INVALID_ARGUMENT, options[i], terminal)
+          return null
+        }
+        parsed[position[pos_index]] = options[i]
+        pos_index += 1
+        i += 1
+      }
+    } 
+    // Not enough argument check here
+    console.log(options, optional, parsed)
+
+    return parsed
   }
 
   // optimization can be done here if the graph generation is too slow
